@@ -65,8 +65,31 @@ class Player(pygame.sprite.Sprite):
         else:
             self.change_y += .95
 
-        # Если на земле, то позиция y как 0
+        # если на земле, то позиция y как 0
         if self.rect.y >= SCREEN_HEIGHT - self.rect.height and self.change_y >= 0:
             self.change_y = 0
             self.rect.y = SCREEN_HEIGHT - self.rect.height
 
+    def jump(self):
+        # обработка прыжка
+        self.rect.y += 10
+        platform_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
+        self.rect.y -= 10
+
+        # прыжок вверх, если всё в порядке
+        if len(platform_hit_list) > 0 or self.rect.bottom >= SCREEN_HEIGHT:
+            self.change_y = -16
+
+        # передвижение влево
+        def go_left(self):
+            self.change_x = -9
+            if (self.right):
+                self.flip()
+                self.right = False
+
+        # передвижение вправо
+        def go_right(self):
+            self.change_x = 9
+            if (not self.right):
+                self.flip()
+                self.right = True
