@@ -1,13 +1,22 @@
 import pygame
 
-pygame.init()
-win = pygame.display.set_mode((700, 700))
-pygame.display.set_caption("Мой платформер")
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
 
-run = True
-while(run):
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
+fon = pygame.image.load('fon.png')
 
-pygame.quit()
+class Player(pygame.sprite.Sprite):
+    right = True
+
+    def __init__(self):
+        super().__init__()
+
+        self.image = pygame.image.load('igrok.png')
+
+        self.rect = self.image.get_rect()
+
+        self.change_x = 0
+        self.change_y = 0
+
+
+
