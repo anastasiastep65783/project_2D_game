@@ -102,4 +102,13 @@ class Player(pygame.sprite.Sprite):
         # игрок переворачивается
         self.image = pygame.transform.flip(self.image, True, False)
 
+    # класс описания платформы
+    class Platform(pygame.sprite.Sprite):
+        def __init__(self, width, height):
+            # Конструктор платформ
+            super().__init__()
+            # загрузка изображения платформы
+            self.image = pygame.image.load('platf.png')
 
+            # границы платформы
+            self.rect = self.image.get_rect()
