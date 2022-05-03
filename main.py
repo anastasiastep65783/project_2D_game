@@ -153,12 +153,13 @@ class Level_01(Level):
             block.player = self.player
             self.platform_list.add(block)
 
+
 # основная функция программы
 def main():
     # инициализация
 	pygame.init()
 
-	# установка высоты и ширины
+    # установка высоты и ширины
     size = [SCREEN_WIDTH, SCREEN_HEIGHT]
     screen = pygame.display.set_mode(size)
 
@@ -185,6 +186,32 @@ def main():
 
     # цикл, пока не будет нажата кнопка закрытия
     done = False
+
+    # управление скоростью обновления экрана
+    clock = pygame.time.Clock()
+
+    # основной цикл программы
+    while not done:
+        # отслеживание действий
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+
+            # если нажатие на стрелки клавиатуры, то движение объекта
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    player.go_left()
+                if event.key == pygame.K_RIGHT:
+                    player.go_right()
+                if event.key == pygame.K_UP:
+                    player.jump()
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT and player.change_x < 0:
+                    player.stop()
+                if event.key == pygame.K_RIGHT and player.change_x > 0:
+                    player.stop()
+
 
 
 
