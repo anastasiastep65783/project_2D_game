@@ -148,29 +148,43 @@ class Level_01(Level):
         # перебор массива и добавление каждой платформы в группу спрайтов
         for platform in level:
             block = Platform(platform[0], platform[1])
-			block.rect.x = platform[2]
-			block.rect.y = platform[3]
-			block.player = self.player
-			self.platform_list.add(block)
+            block.rect.x = platform[2]
+            block.rect.y = platform[3]
+            block.player = self.player
+            self.platform_list.add(block)
 
 # основная функция программы
 def main():
-	# инициализация
+    # инициализация
 	pygame.init()
 
 	# установка высоты и ширины
-	size = [SCREEN_WIDTH, SCREEN_HEIGHT]
-	screen = pygame.display.set_mode(size)
+    size = [SCREEN_WIDTH, SCREEN_HEIGHT]
+    screen = pygame.display.set_mode(size)
 
     # название игры
-    pygame.display.set_caption("Платформер")
-    # создаем игрока
+    pygame.display.set_caption("Мой платформер 2д")
+
+    # создание игрока
     player = Player()
 
-    # Создаем все уровни
+    # создание уровней
     level_list = []
     level_list.append(Level_01(player))
 
+    # устанавка текущего уровеня
+    current_level_no = 0
+    current_level = level_list[current_level_no]
+
+    active_sprite_list = pygame.sprite.Group()
+    player.level = current_level
+
+    player.rect.x = 340
+    player.rect.y = SCREEN_HEIGHT - player.rect.height
+    active_sprite_list.add(player)
+
+    # цикл, пока не будет нажата кнопка закрытия
+    done = False
 
 
 
