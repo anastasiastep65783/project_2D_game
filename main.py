@@ -36,7 +36,8 @@ class Player(pygame.sprite.Sprite):
         block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
         # перебор объектов
         for block in block_hit_list:
-            # если движение вправо, установление правой стороны игрока на левую сторону объекта, с которым произошло столкновение
+            # если движение вправо, установление правой стороны игрока
+            # на левую сторону объекта, с которым произошло столкновение
             if self.change_x > 0:
                 self.rect.right = block.rect.left
             # ситуация наоборот
@@ -56,4 +57,16 @@ class Player(pygame.sprite.Sprite):
 
             # остановка движения вправо-влево
             self.change_y = 0
+
+    def calc_grav(self):
+        # скорость падения объекта
+        if self.change_y == 0:
+            self.change_y = 1
+        else:
+            self.change_y += .95
+
+        # Если на земле, то позиция y как 0
+        if self.rect.y >= SCREEN_HEIGHT - self.rect.height and self.change_y >= 0:
+            self.change_y = 0
+            self.rect.y = SCREEN_HEIGHT - self.rect.height
 
