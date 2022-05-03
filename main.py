@@ -161,3 +161,17 @@ def main():
 	# установка высоты и ширины
 	size = [SCREEN_WIDTH, SCREEN_HEIGHT]
 	screen = pygame.display.set_mode(size)
+
+    # название игры
+    pygame.display.set_caption("Платформер")
+    # создаем игрока
+    player = Player()
+
+    # Создаем все уровни
+    level_list = []
+    level_list.append(Level_01(player))
+
+
+
+
+
