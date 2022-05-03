@@ -1,22 +1,59 @@
 import pygame
 
+# размер окна игры
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
+# загрузка фона для игры
 fon = pygame.image.load('fon.png')
 
+# класс действий игрока
 class Player(pygame.sprite.Sprite):
+    # игрок смотрит вправо
     right = True
 
     def __init__(self):
         super().__init__()
 
+        # изображение игрока
         self.image = pygame.image.load('igrok.png')
 
+        # границы персонажа
         self.rect = self.image.get_rect()
 
+        # скорость игрока
         self.change_x = 0
         self.change_y = 0
 
+    def update(self):
+        # гравитация
+        self.calc_grav()
 
+        # передвижение вправо-влево
+        self.rect.x += self.change_x
+
+        # слежка за столкновением с объектами
+        block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
+        # перебор объектов
+        for block in block_hit_list:
+            # если движение вправо, установление правой стороны игрока на левую сторону объекта, с которым произошло столкновение
+            if self.change_x > 0:
+                self.rect.right = block.rect.left
+            # ситуация наоборот
+            elif self.change_x < 0:
+                self.rect.left = block.rect.right
+
+        # движение вверх вниз
+        self.rect.y += self.change_y
+
+        # ситуация как с право-лево, но вверх-вниз
+        block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
+        for block in block_hit_list:
+            if self.change_y > 0:
+                self.rect.bottom = block.rect.top
+            elif self.change_y < 0:
+                self.rect.top = block.rect.bottom
+
+            # остановка движения вправо-влево
+            self.change_y = 0
 
