@@ -80,16 +80,26 @@ class Player(pygame.sprite.Sprite):
         if len(platform_hit_list) > 0 or self.rect.bottom >= SCREEN_HEIGHT:
             self.change_y = -16
 
-        # передвижение влево
-        def go_left(self):
-            self.change_x = -9
-            if (self.right):
-                self.flip()
-                self.right = False
+    # передвижение влево
+    def go_left(self):
+        self.change_x = -9
+        if (self.right):
+            self.flip()
+            self.right = False
 
-        # передвижение вправо
-        def go_right(self):
-            self.change_x = 9
-            if (not self.right):
-                self.flip()
-                self.right = True
+    # передвижение вправо
+    def go_right(self):
+        self.change_x = 9
+        if (not self.right):
+            self.flip()
+            self.right = True
+
+    def stop(self):
+        # стоять, если не задействуются клавиши
+        self.change_x = 0
+
+    def flip(self):
+        # игрок переворачивается
+        self.image = pygame.transform.flip(self.image, True, False)
+
+
