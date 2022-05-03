@@ -5,7 +5,7 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
 # загрузка фона для игры
-fon = pygame.image.load('fon.png')
+fon = pygame.image.load('fon.jpg')
 
 
 # класс действий игрока
@@ -143,7 +143,11 @@ class Level_01(Level):
         Level.__init__(self, player)
 
         # массив с данными про платформы
-        level = [[210, 32, 500, 500], [210, 32, 200, 400], [210, 32, 600, 300]]
+        level = [
+            [210, 32, 500, 500],
+            [210, 32, 200, 400],
+            [210, 32, 600, 300],
+        ]
 
         # перебор массива и добавление каждой платформы в группу спрайтов
         for platform in level:
@@ -173,7 +177,7 @@ def main():
     level_list = []
     level_list.append(Level_01(player))
 
-    # устанавка текущего уровеня
+    # устанавка текущего уровня
     current_level_no = 0
     current_level = level_list[current_level_no]
 
@@ -236,5 +240,8 @@ def main():
         # обновление экрана после рисования объектов
         pygame.display.flip()
 
-        # закрытие программы
-        pygame.quit()
+    # закрытие программы
+    pygame.quit()
+
+    if __name__ == "__main__":
+        main()
