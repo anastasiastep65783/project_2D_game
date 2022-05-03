@@ -153,3 +153,11 @@ class Level_01(Level):
 			block.player = self.player
 			self.platform_list.add(block)
 
+# основная функция программы
+def main():
+	# инициализация
+	pygame.init()
+
+	# установка высоты и ширины
+	size = [SCREEN_WIDTH, SCREEN_HEIGHT]
+	screen = pygame.display.set_mode(size)
