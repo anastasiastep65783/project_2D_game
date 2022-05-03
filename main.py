@@ -157,7 +157,7 @@ class Level_01(Level):
 # основная функция программы
 def main():
     # инициализация
-	pygame.init()
+    pygame.init()
 
     # установка высоты и ширины
     size = [SCREEN_WIDTH, SCREEN_HEIGHT]
@@ -212,7 +212,29 @@ def main():
                 if event.key == pygame.K_RIGHT and player.change_x > 0:
                     player.stop()
 
+        # обновление игрока
+        active_sprite_list.update()
 
+        # обновление объектов
+        current_level.update()
 
+        # если игрок приблизится к правой стороне, то дальше не двигается
+        if player.rect.right > SCREEN_WIDTH:
+            player.rect.right = SCREEN_WIDTH
 
+        # если игрок приблизится к левой стороне, то дальше не двигается
+        if player.rect.left < 0:
+            player.rect.left = 0
 
+        # рисование объектов на окне
+        current_level.draw(screen)
+        active_sprite_list.draw(screen)
+
+        # устанавка количества фреймов
+        clock.tick(30)
+
+        # обновление экрана после рисования объектов
+        pygame.display.flip()
+
+        # закрытие программы
+        pygame.quit()
