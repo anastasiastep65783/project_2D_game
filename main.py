@@ -112,3 +112,23 @@ class Player(pygame.sprite.Sprite):
 
             # границы платформы
             self.rect = self.image.get_rect()
+
+    # класс расположения платформ
+    class Level(object):
+        def __init__(self, player):
+            # Создаем группу спрайтов (поместим платформы различные сюда)
+            self.platform_list = pygame.sprite.Group()
+            # Ссылка на основного игрока
+            self.player = player
+
+        # обновление экрана
+        def update(self):
+            self.platform_list.update()
+
+        # рисование объектов
+        def draw(self, screen):
+            # рисование фона
+            screen.blit(fon, (0, 0))
+
+            # рисование платформ из группы спрайтов
+            self.platform_list.draw(screen)
