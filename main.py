@@ -7,6 +7,7 @@ SCREEN_HEIGHT = 600
 # загрузка фона для игры
 fon = pygame.image.load('fon.png')
 
+
 # класс действий игрока
 class Player(pygame.sprite.Sprite):
     # игрок смотрит вправо
@@ -102,33 +103,53 @@ class Player(pygame.sprite.Sprite):
         # игрок переворачивается
         self.image = pygame.transform.flip(self.image, True, False)
 
-    # класс описания платформы
-    class Platform(pygame.sprite.Sprite):
-        def __init__(self, width, height):
-            # Конструктор платформ
-            super().__init__()
-            # загрузка изображения платформы
-            self.image = pygame.image.load('platf.png')
 
-            # границы платформы
-            self.rect = self.image.get_rect()
+# класс описания платформы
+class Platform(pygame.sprite.Sprite):
+    def __init__(self, width, height):
+        # Конструктор платформ
+        super().__init__()
+        # загрузка изображения платформы
+        self.image = pygame.image.load('platf.png')
 
-    # класс расположения платформ
-    class Level(object):
-        def __init__(self, player):
-            # Создаем группу спрайтов (поместим платформы различные сюда)
-            self.platform_list = pygame.sprite.Group()
-            # Ссылка на основного игрока
-            self.player = player
+        # границы платформы
+        self.rect = self.image.get_rect()
 
-        # обновление экрана
-        def update(self):
-            self.platform_list.update()
 
-        # рисование объектов
-        def draw(self, screen):
-            # рисование фона
-            screen.blit(fon, (0, 0))
+# класс расположения платформ
+class Level(object):
+    def __init__(self, player):
+        # группа спрайтов
+        self.platform_list = pygame.sprite.Group()
+        # ссылка на основного игрока
+        self.player = player
 
-            # рисование платформ из группы спрайтов
-            self.platform_list.draw(screen)
+    # обновление экрана
+    def update(self):
+        self.platform_list.update()
+
+    # рисование объектов
+    def draw(self, screen):
+        # рисование фона
+        screen.blit(fon, (0, 0))
+
+        # рисование платформ из группы спрайтов
+        self.platform_list.draw(screen)
+
+
+class Level_01(Level):
+    def __init__(self, player):
+        # родительский конструктор
+        Level.__init__(self, player)
+
+        # массив с данными про платформы
+        level = [[210, 32, 500, 500], [210, 32, 200, 400], [210, 32, 600, 300]]
+
+        # перебор массива и добавление каждой платформы в группу спрайтов
+        for platform in level:
+            block = Platform(platform[0], platform[1])
+			block.rect.x = platform[2]
+			block.rect.y = platform[3]
+			block.player = self.player
+			self.platform_list.add(block)
+
