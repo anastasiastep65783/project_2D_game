@@ -235,7 +235,7 @@ def main():
         active_sprite_list.draw(screen)
 
         # устанавка количества фреймов
-        clock.tick(30)
+        clock.tick(45)
 
         # обновление экрана после рисования объектов
         pygame.display.flip()
@@ -243,5 +243,5 @@ def main():
     # закрытие программы
     pygame.quit()
 
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()
