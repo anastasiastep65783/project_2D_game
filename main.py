@@ -6,7 +6,8 @@ SCREEN_HEIGHT = 600
 
 # загрузка фона для игры
 fon = pygame.image.load('fon.jpg')
-
+start = pygame.image.load('start.jpg')
+exit = pygame.image.load('exit.jpg')
 
 # класс действий игрока
 class Player(pygame.sprite.Sprite):
