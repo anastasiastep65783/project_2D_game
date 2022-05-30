@@ -9,6 +9,16 @@ fon = pygame.image.load('fon.jpg')
 start = pygame.image.load('start.jpg')
 exit = pygame.image.load('exit.jpg')
 
+
+class Button():
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.clicked = False
+
+
 # класс действий игрока
 class Player(pygame.sprite.Sprite):
     # игрок смотрит вправо
