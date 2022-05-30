@@ -9,6 +9,9 @@ fon = pygame.image.load('fon.jpg')
 start = pygame.image.load('start.jpg')
 exit = pygame.image.load('exit.jpg')
 
+# установка высоты и ширины
+size = [SCREEN_WIDTH, SCREEN_HEIGHT]
+screen = pygame.display.set_mode(size)
 
 class Button():
     def __init__(self, x, y, image):
@@ -17,6 +20,26 @@ class Button():
         self.rect.x = x
         self.rect.y = y
         self.clicked = False
+
+    def draw(self):
+        action = False
+
+        # установить позицию мыши
+        pos = pygame.mouse.get_pos()
+
+        # проверка курсора мыши и условий нажатия
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                action = True
+                self.clicked = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+
+        # создать кнопку
+        screen.blit(self.image, self.rect)
+
+        return action
 
 
 # класс действий игрока
@@ -174,9 +197,7 @@ def main():
     # инициализация
     pygame.init()
 
-    # установка высоты и ширины
-    size = [SCREEN_WIDTH, SCREEN_HEIGHT]
-    screen = pygame.display.set_mode(size)
+
 
     # название игры
     pygame.display.set_caption("Мой платформер 2д")
