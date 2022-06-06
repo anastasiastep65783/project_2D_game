@@ -1,17 +1,28 @@
 import pygame
 
-# размер окна игры
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+pygame.init()
 
-# загрузка фона для игры
-fon = pygame.image.load('fon.jpg')
-start = pygame.image.load('start.jpg')
-exit = pygame.image.load('exit.jpg')
+clock = pygame.time.Clock()
+fps = 60
 
-# установка высоты и ширины
-size = [SCREEN_WIDTH, SCREEN_HEIGHT]
-screen = pygame.display.set_mode(size)
+screen_width = 800
+screen_height = 600
+
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption('Мой платформер 2д')
+
+# переменные
+tile_size = 50
+game_over = 0
+main_menu = True
+
+
+# загрузка изображений
+fon = pygame.image.load('fon.png')
+restart_img = pygame.image.load('restart.png')
+start_img = pygame.image.load('start.png')
+exit_img = pygame.image.load('exit.png')
+
 
 class Button():
     def __init__(self, x, y, image):
@@ -36,244 +47,229 @@ class Button():
         if pygame.mouse.get_pressed()[0] == 0:
             self.clicked = False
 
-        # создать кнопку
+        # создание кнопки
         screen.blit(self.image, self.rect)
 
         return action
 
 
-# класс действий игрока
-class Player(pygame.sprite.Sprite):
-    # игрок смотрит вправо
-    right = True
+class Player():
+    def __init__(self, x, y):
+        self.reset(x, y)
 
-    def __init__(self):
-        super().__init__()
+    def update(self, game_over):
+        dx = 0
+        dy = 0
 
-        # изображение игрока
-        self.image = pygame.image.load('igrok.png')
+        if game_over == 0:
+            # нажатие на клавиши
+            key = pygame.key.get_pressed()
+            if key[pygame.K_SPACE] and self.jumped == False and self.in_air == False:
+                self.vel_y = -15
+                self.jumped = True
+            if key[pygame.K_SPACE] == False:
+                self.jumped = False
+            if key[pygame.K_LEFT]:
+                dx -= 5
+                self.counter += 1
+                self.direction = -1
+            if key[pygame.K_RIGHT]:
+                dx += 5
+                self.counter += 1
+                self.direction = 1
+            if key[pygame.K_LEFT] == False and key[pygame.K_RIGHT] == False:
+                self.counter = 0
+                self.index = 0
+                if self.direction == 1:
+                    self.image = self.images_right[self.index]
+                if self.direction == -1:
+                    self.image = self.images_left[self.index]
 
-        # границы персонажа
+
+            # гравитация
+            self.vel_y += 1
+            if self.vel_y > 10:
+                self.vel_y = 10
+            dy += self.vel_y
+
+            # слежка за столкновением с объектами
+            self.in_air = True
+            for tile in world.tile_list:
+                if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height):
+                    dx = 0
+                if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
+                    if self.vel_y < 0:
+                        dy = tile[1].bottom - self.rect.top
+                        self.vel_y = 0
+                    elif self.vel_y >= 0:
+                        dy = tile[1].top - self.rect.bottom
+                        self.vel_y = 0
+                        self.in_air = False
+
+            # проверка столкновений с врагами
+            if pygame.sprite.spritecollide(self, blob_group, False):
+                game_over = -1
+
+            # обновление игрока
+            self.rect.x += dx
+            self.rect.y += dy
+
+
+        elif game_over == -1:
+            self.image = self.dead_image
+            if self.rect.y > 200:
+                self.rect.y -= 5
+
+        # рисование игрока
+        screen.blit(self.image, self.rect)
+
+        return game_over
+
+    def reset(self, x, y):
+        self.images_right = []
+        self.images_left = []
+        self.index = 0
+        self.counter = 0
+        for num in range(1, 5):
+            img_right = pygame.image.load('igrok.png')
+            img_right = pygame.transform.scale(img_right, (50, 71))
+            img_left = pygame.transform.flip(img_right, True, False)
+            self.images_right.append(img_right)
+            self.images_left.append(img_left)
+        self.dead_image = pygame.image.load('dead.png')
+        self.image = self.images_right[self.index]
         self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
+        self.vel_y = 0
+        self.jumped = False
+        self.direction = 0
+        self.in_air = True
 
-        # скорость игрока
-        self.change_x = 0
-        self.change_y = 0
+
+class World():
+    def __init__(self, data):
+        self.tile_list = []
+
+        # загрузка изображений
+        dirt_img = pygame.image.load('dirt1.png')
+        grass_img = pygame.image.load('grass.png')
+
+        row_count = 0
+        for row in data:
+            col_count = 0
+            for tile in row:
+                if tile == 1:
+                    img = pygame.transform.scale(dirt_img, (tile_size, tile_size))
+                    img_rect = img.get_rect()
+                    img_rect.x = col_count * tile_size
+                    img_rect.y = row_count * tile_size
+                    tile = (img, img_rect)
+                    self.tile_list.append(tile)
+                if tile == 2:
+                    img = pygame.transform.scale(grass_img, (tile_size, tile_size))
+                    img_rect = img.get_rect()
+                    img_rect.x = col_count * tile_size
+                    img_rect.y = row_count * tile_size
+                    tile = (img, img_rect)
+                    self.tile_list.append(tile)
+                if tile == 3:
+                    blob = Enemy(col_count * tile_size, row_count * tile_size + 15)
+                    blob_group.add(blob)
+
+                col_count += 1
+            row_count += 1
+
+    def draw(self):
+        for tile in self.tile_list:
+            screen.blit(tile[0], tile[1])
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('enemy.png')
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.move_direction = 1
+        self.move_counter = 0
 
     def update(self):
-        # гравитация
-        self.calc_grav()
-
-        # передвижение вправо-влево
-        self.rect.x += self.change_x
-
-        # слежка за столкновением с объектами
-        block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
-        # перебор объектов
-        for block in block_hit_list:
-            # если движение вправо, установление правой стороны игрока
-            # на левую сторону объекта, с которым произошло столкновение
-            if self.change_x > 0:
-                self.rect.right = block.rect.left
-            # ситуация наоборот
-            elif self.change_x < 0:
-                self.rect.left = block.rect.right
-
-        # движение вверх вниз
-        self.rect.y += self.change_y
-
-        # ситуация как с право-лево, но вверх-вниз
-        block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
-        for block in block_hit_list:
-            if self.change_y > 0:
-                self.rect.bottom = block.rect.top
-            elif self.change_y < 0:
-                self.rect.top = block.rect.bottom
-
-            # остановка движения вправо-влево
-            self.change_y = 0
-
-    def calc_grav(self):
-        # скорость падения объекта
-        if self.change_y == 0:
-            self.change_y = 1
-        else:
-            self.change_y += .95
-
-        # если на земле, то позиция y как 0
-        if self.rect.y >= SCREEN_HEIGHT - self.rect.height and self.change_y >= 0:
-            self.change_y = 0
-            self.rect.y = SCREEN_HEIGHT - self.rect.height
-
-    def jump(self):
-        # обработка прыжка
-        self.rect.y += 10
-        platform_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
-        self.rect.y -= 10
-
-        # прыжок вверх, если всё в порядке
-        if len(platform_hit_list) > 0 or self.rect.bottom >= SCREEN_HEIGHT:
-            self.change_y = -16
-
-    # передвижение влево
-    def go_left(self):
-        self.change_x = -9
-        if (self.right):
-            self.flip()
-            self.right = False
-
-    # передвижение вправо
-    def go_right(self):
-        self.change_x = 9
-        if (not self.right):
-            self.flip()
-            self.right = True
-
-    def stop(self):
-        # стоять, если не задействуются клавиши
-        self.change_x = 0
-
-    def flip(self):
-        # игрок переворачивается
-        self.image = pygame.transform.flip(self.image, True, False)
+        self.rect.x += self.move_direction
+        self.move_counter += 1
+        if abs(self.move_counter) > 50:
+            self.move_direction *= -1
+            self.move_counter *= -1
 
 
-# класс описания платформы
-class Platform(pygame.sprite.Sprite):
-    def __init__(self, width, height):
-        # Конструктор платформ
-        super().__init__()
-        # загрузка изображения платформы
-        self.image = pygame.image.load('platf.png')
+world_data = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0],
+    [0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 2, 2, 2, 2, 2, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+]
 
-        # границы платформы
-        self.rect = self.image.get_rect()
+player = Player(100, screen_height - 130)
 
+blob_group = pygame.sprite.Group()
 
-# класс расположения платформ
-class Level(object):
-    def __init__(self, player):
-        # группа спрайтов
-        self.platform_list = pygame.sprite.Group()
-        # ссылка на основного игрока
-        self.player = player
+world = World(world_data)
 
-    # обновление экрана
-    def update(self):
-        self.platform_list.update()
+# создание кнопок
+restart_button = Button(screen_width // 2 - 50, screen_height // 2 + 100, restart_img)
+start_button = Button(screen_width // 2 - 250, screen_height // 2, start_img)
+exit_button = Button(screen_width // 2 + 150, screen_height // 2, exit_img)
 
-    # рисование объектов
-    def draw(self, screen):
-        # рисование фона
-        screen.blit(fon, (0, 0))
+run = True
+while run:
 
-        # рисование платформ из группы спрайтов
-        self.platform_list.draw(screen)
+    clock.tick(fps)
 
+    screen.blit(fon, (0, 0))
 
-class Level_01(Level):
-    def __init__(self, player):
-        # родительский конструктор
-        Level.__init__(self, player)
+    if main_menu == True:
+        if exit_button.draw():
+            run = False
+        if start_button.draw():
+            main_menu = False
+    else:
 
-        # массив с данными про платформы
-        level = [
-            [210, 32, 500, 500],
-            [210, 32, 200, 400],
-            [210, 32, 600, 300],
-        ]
+        world.draw()
 
-        # перебор массива и добавление каждой платформы в группу спрайтов
-        for platform in level:
-            block = Platform(platform[0], platform[1])
-            block.rect.x = platform[2]
-            block.rect.y = platform[3]
-            block.player = self.player
-            self.platform_list.add(block)
-
-
-# основная функция программы
-def main():
-    # инициализация
-    pygame.init()
-
-
-
-    # название игры
-    pygame.display.set_caption("Мой платформер 2д")
-
-    # создание игрока
-    player = Player()
-
-    # создание уровней
-    level_list = []
-    level_list.append(Level_01(player))
-
-    # устанавка текущего уровня
-    current_level_no = 0
-    current_level = level_list[current_level_no]
-
-    active_sprite_list = pygame.sprite.Group()
-    player.level = current_level
-
-    player.rect.x = 340
-    player.rect.y = SCREEN_HEIGHT - player.rect.height
-    active_sprite_list.add(player)
-
-    # цикл, пока не будет нажата кнопка закрытия
-    done = False
-
-    # управление скоростью обновления экрана
-    clock = pygame.time.Clock()
-
-    # основной цикл программы
-    while not done:
-        # отслеживание действий
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                done = True
-
-            # если нажатие на стрелки клавиатуры, то движение объекта
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    player.go_left()
-                if event.key == pygame.K_RIGHT:
-                    player.go_right()
-                if event.key == pygame.K_UP:
-                    player.jump()
-
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT and player.change_x < 0:
-                    player.stop()
-                if event.key == pygame.K_RIGHT and player.change_x > 0:
-                    player.stop()
-
-        # обновление игрока
-        active_sprite_list.update()
-
-        # обновление объектов
-        current_level.update()
-
-        # если игрок приблизится к правой стороне, то дальше не двигается
-        if player.rect.right > SCREEN_WIDTH:
-            player.rect.right = SCREEN_WIDTH
+        if player.rect.right > screen_width:
+            player.rect.right = screen_width
 
         # если игрок приблизится к левой стороне, то дальше не двигается
         if player.rect.left < 0:
             player.rect.left = 0
 
-        # рисование объектов на окне
-        current_level.draw(screen)
-        active_sprite_list.draw(screen)
+        if game_over == 0:
+            blob_group.update()
 
-        # устанавка количества фреймов
-        clock.tick(45)
+        blob_group.draw(screen)
 
-        # обновление экрана после рисования объектов
-        pygame.display.flip()
+        game_over = player.update(game_over)
 
-    # закрытие программы
-    pygame.quit()
+        # если игрок умирает
+        if game_over == -1:
+            if restart_button.draw():
+                player.reset(100, screen_height - 130)
+                game_over = 0
 
-if __name__ == "__main__":
-    main()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+
+    pygame.display.update()
+
+pygame.quit()
