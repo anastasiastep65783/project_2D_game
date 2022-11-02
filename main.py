@@ -110,6 +110,11 @@ class Player():
             if pygame.sprite.spritecollide(self, blob_group, False):
                 game_over = -1
 
+            # проверка выхода
+            if pygame.sprite.spritecollide(self, exit_group, False):
+                    game_over = 1
+
+
             # обновление игрока
             self.rect.x += dx
             self.rect.y += dy
@@ -178,6 +183,9 @@ class World():
                 if tile == 3:
                     blob = Enemy(col_count * tile_size, row_count * tile_size + 15)
                     blob_group.add(blob)
+                if tile == 4:
+                    exit = Exit(col_count * tile_size, row_count * tile_size - (tile_size // 2))
+                    exit_group.add(exit)
 
                 col_count += 1
             row_count += 1
@@ -204,12 +212,22 @@ class Enemy(pygame.sprite.Sprite):
             self.move_counter *= -1
 
 
+class Exit(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load('exit.png')
+        self.image = pygame.transform.scale(img, (tile_size, int(tile_size * 1.5)))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+
 world_data = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 3, 0, 4],
     [0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 2, 2, 2, 2, 2, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -222,6 +240,7 @@ world_data = [
 player = Player(100, screen_height - 130)
 
 blob_group = pygame.sprite.Group()
+exit_group = pygame.sprite.Group()
 
 world = World(world_data)
 
@@ -257,6 +276,8 @@ while run:
             blob_group.update()
 
         blob_group.draw(screen)
+        exit_group.draw(screen)
+
 
         game_over = player.update(game_over)
 
@@ -265,6 +286,11 @@ while run:
             if restart_button.draw():
                 player.reset(100, screen_height - 130)
                 game_over = 0
+
+    if game_over == 1:
+        if restart_button.draw():
+            player.reset(100, screen_height - 130)
+            game_over = 0
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
