@@ -20,6 +20,7 @@ main_menu = True
 # загрузка изображений
 fon = pygame.image.load('fon.png')
 restart_img = pygame.image.load('restart.png')
+youwin_img = pygame.image.load('youwin.png')
 start_img = pygame.image.load('start.png')
 exit_img = pygame.image.load('exit.png')
 
@@ -215,7 +216,7 @@ class Enemy(pygame.sprite.Sprite):
 class Exit(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('exit.png')
+        img = pygame.image.load('exit_1.png')
         self.image = pygame.transform.scale(img, (tile_size, int(tile_size * 1.5)))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -246,6 +247,7 @@ world = World(world_data)
 
 # создание кнопок
 restart_button = Button(screen_width // 2 - 50, screen_height // 2 + 100, restart_img)
+youwin_button = Button(screen_width // 2 - 50, screen_height // 2 + 100, youwin_img)
 start_button = Button(screen_width // 2 - 250, screen_height // 2, start_img)
 exit_button = Button(screen_width // 2 + 150, screen_height // 2, exit_img)
 
@@ -288,7 +290,7 @@ while run:
                 game_over = 0
 
     if game_over == 1:
-        if restart_button.draw():
+        if youwin_button.draw():
             player.reset(100, screen_height - 130)
             game_over = 0
 
